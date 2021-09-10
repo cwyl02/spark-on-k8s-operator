@@ -1,0 +1,6 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestStep
+commands:
+- command: kubectl delete ns spark
+- command: kubectl delete clusterrole spark-operator-custom-sa spark-operator
+- command: kubectl delete clusterrolebindings spark-operator-custom-sa spark-operator

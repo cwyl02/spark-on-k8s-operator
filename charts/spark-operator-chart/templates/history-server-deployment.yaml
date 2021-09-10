@@ -1,0 +1,95 @@
+{{- if .Values.historyServer.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "spark-operator.fullname" . }}-history-server
+  namespace: {{ default .Release.Namespace .Values.historyServer.namespace }}
+  labels:
+    app.kubernetes.io/name: {{ .Chart.Name }}-history-server
+    app.kubernetes.io/instance: {{ include "spark-operator.fullname" . }}-history-server
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ .Chart.Name }}-history-server
+      app.kubernetes.io/instance: {{ include "spark-operator.fullname" . }}-history-server
+      app.kubernetes.io/version: {{ .Chart.AppVersion }}
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ .Chart.Name }}-history-server
+        app.kubernetes.io/instance: {{ include "spark-operator.fullname" . }}-history-server
+        app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    spec:
+      serviceAccountName: {{ include "spark-operator.serviceAccountName" . }}
+      containers:
+      - name: history-server
+        image: {{ .Values.historyServer.image.repository }}:{{ default (include "history-server.spark-image-tag" .) .Values.historyServer.image.tag }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        command: ["/opt/spark/sbin/start-history-server.sh"]
+        env:
+        - name: SPARK_USER
+          value: "spark"
+        - name: SPARK_USER_NAME
+          value: "spark"
+        - name: SPARK_NO_DAEMONIZE
+          value: "true"
+        {{- if .Values.historyServer.delegationTokenSecret }}
+        - name: HADOOP_TOKEN_FILE_LOCATION
+          value: "/mnt/secrets/hadoop.token"
+        {{- end }}
+        {{- if or (.Values.historyServer.fs.logDirectory) (.Values.historyServer.opts) }}
+        - name: SPARK_HISTORY_OPTS
+          value: >-
+           {{ .Values.historyServer.opts -}}
+           {{- if .Values.historyServer.fs.logDirectory }}
+           -Dspark.history.fs.logDirectory={{ .Values.historyServer.fs.logDirectory }}
+           -Dspark.history.fs.cleaner.enabled={{ .Values.historyServer.fs.cleaner.enabled }}
+           -Dspark.history.fs.cleaner.interval={{ .Values.historyServer.fs.cleaner.interval }}
+           -Dspark.history.fs.cleaner.maxAge={{ .Values.historyServer.fs.cleaner.maxAge }}
+           {{- end }}
+        {{- end }}
+        ports:
+        - containerPort: 18080
+          name: "history-server"
+        volumeMounts:
+          {{- if .Values.historyServer.fs.logDirectory }}
+          - mountPath: "{{ .Values.historyServer.fs.logDirectory }}"
+            name: history-server-storage
+          {{- else }}
+          - mountPath: "/tmp/spark-events"
+            name: history-server-storage
+          {{- end }}
+          {{- if .Values.historyServer.sparkConfSecret }}
+          - name: spark-conf
+            mountPath: "/opt/spark/conf"
+            readOnly: true
+          {{- end }}
+          {{- if .Values.historyServer.delegationTokenSecret }}
+          - name: hadoop-token
+            mountPath: /mnt/secrets
+            readOnly: true
+          {{- end }}
+      volumes:
+        {{- if .Values.historyServer.pvcName }}
+        - name: history-server-storage
+          persistentVolumeClaim:
+            claimName: {{ .Values.historyServer.pvcName }}
+        {{- else }}
+        - name: history-server-storage
+          emptyDir: {}
+        {{- end }}
+        {{- if .Values.historyServer.sparkConfSecret }}
+        - name: spark-conf
+          secret:
+            secretName: {{ .Values.historyServer.sparkConfSecret }}
+        {{- end }}
+        {{- if .Values.historyServer.delegationTokenSecret }}
+        - name: hadoop-token
+          secret:
+            secretName: {{ .Values.historyServer.delegationTokenSecret }}
+        {{- end }}
+{{- end }}

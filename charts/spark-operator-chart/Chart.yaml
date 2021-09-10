@@ -5,7 +5,10 @@ version: 1.1.6
 appVersion: v1beta2-1.2.3-3.1.1
 keywords:
   - spark
-home: https://github.com/GoogleCloudPlatform/spark-on-k8s-operator
+  - d2iq
+home: https://github.com/mesosphere/spark-on-k8s-operator
 maintainers:
+  - name: D2iQ Support
+    email: support@d2iq.com
   - name: yuchaoran2011
     email: yuchaoran2011@gmail.com
