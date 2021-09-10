@@ -8,11 +8,11 @@ replicaCount: 1
 
 image:
   # -- Image repository
-  repository: ghcr.io/googlecloudplatform/spark-operator
+  repository: docker.io/mesosphere/spark-operator
   # -- Image pull policy
   pullPolicy: IfNotPresent
-  # -- if set, override the image tag whose default is the chart appVersion.
-  tag: ""
+  # -- Overrides the image tag whose default is the chart appVersion.
+  tag: "3.1.1-1.1.6"
 
 # -- Image pull secrets
 imagePullSecrets: []
@@ -82,7 +82,7 @@ volumeMounts: []
 
 webhook:
   # -- Enable webhook server
-  enable: false
+  enable: true
   # -- Webhook service port
   port: 8080
   # -- The webhook server will only operate on namespaces with this label, specified in the form key1=value1,key2=value2.
@@ -101,7 +101,7 @@ webhook:
 
 metrics:
   # -- Enable prometheus metric scraping
-  enable: true
+  enable: false
   # -- Metrics port
   port: 10254
   # -- Metrics port name
@@ -167,6 +167,12 @@ leaderElection:
   lockName: "spark-operator-lock"
   # -- Optionally store the lock in another namespace. Defaults to operator's namespace
   lockNamespace: ""
+  # -- Leader election lease duration.
+  leaseDuration: 15s
+  # -- Leader election renew deadline.
+  renewDeadline: 14s
+  # -- Leader election retry period.
+  retryPeriod: 4s
 
 istio:
   # -- When using `istio`, spark jobs need to run without a sidecar to properly terminate
@@ -174,3 +180,36 @@ istio:
 
 # labelSelectorFilter -- A comma-separated list of key=value, or key labels to filter resources during watch and list based on the specified labels.
 labelSelectorFilter: ""
+
+historyServer:
+  # -- Enable Spark History Server
+  enabled: false
+  # -- Optionally start History Server in another namespace. Defaults to operator's namespace
+  namespace: ""
+  # -- Extra options to pass to the Spark History Server
+  opts: ""
+  # -- Name of a Secret with Hadoop Delegation Token. The secret should be in the same namespace as the Operator.
+  delegationTokenSecret: ""
+  # -- Name of a Secret with Spark config file. The secret should be in the same namespace as the Operator. 
+  sparkConfSecret: ""
+  # -- External Persistent Volume Claim Name used for Spark event logs storage by History Server. Used with fs.logDirectory option.  
+  pvcName:  ""
+  fs:
+    # -- Spark EventLog Directory from which to load events for prior Spark job runs (e.g., hdfs://hdfs/ or s3a://path/to/bucket).
+    # -- Note: You'd typically want to set this to point to distributed/HA storage via the pvcName option.
+    logDirectory: ""
+    cleaner:
+      # -- Specifies whether the Spark History Server should periodically clean up event logs from storage. 
+      enabled: false
+      # -- Frequency the Spark History Server checks for files to delete.
+      interval: "1d"
+      # -- History files older than this will be deleted.
+      maxAge: "7d"
+  image:
+    # -- Image repository
+    # repository: gcr.io/spark-operator/spark
+    repository: docker.io/mesosphere/spark
+    # -- Image pull policy
+    pullPolicy: IfNotPresent
+    # -- Overrides the image tag. Default is the base Spark Version from the chart appVersion.
+    tag: spark-3.1.1-hadoop-2.9-k8s

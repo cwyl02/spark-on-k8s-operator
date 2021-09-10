@@ -1,0 +1,25 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestStep
+commands:
+  - script: |
+      /bin/bash << 'EOF'
+        set -x
+
+        helm repo add spark-operator http://chartmuseum:CHARTMUSEUM_PORT
+        helm repo update
+        
+        helm upgrade \
+        spark-operator \
+        spark-operator/spark-operator \
+        --create-namespace \
+        --namespace spark \
+        --debug \
+        --set image.repository=OPERATOR_DOCKER_REPO \
+        --set image.tag=OPERATOR_VERSION \
+        --set historyServer.image.repository=SPARK_DOCKER_REPO \
+        --set historyServer.image.tag=SPARK_IMAGE_TAG \
+        --set historyServer.enabled=true \
+        --wait \
+        --timeout 600s
+      EOF
+    timeout: 3600

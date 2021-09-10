@@ -58,7 +58,7 @@ spec:
         - -v={{ .Values.logLevel }}
         - -logtostderr
         - -namespace={{ .Values.sparkJobNamespace }}
-        - -enable-ui-service={{ .Values.uiService.enable}}
+        #- -enable-ui-service={{ .Values.uiService.enable}}
         - -ingress-url-format={{ .Values.ingressUrlFormat }}
         - -controller-threads={{ .Values.controllerThreads }}
         - -resync-interval={{ .Values.resyncInterval }}
@@ -85,6 +85,9 @@ spec:
         - -leader-election=true
         - -leader-election-lock-namespace={{ default .Release.Namespace .Values.leaderElection.lockNamespace }}
         - -leader-election-lock-name={{ .Values.leaderElection.lockName }}
+        - -leader-election-lease-duration={{ .Values.leaderElection.leaseDuration }}
+        - -leader-election-renew-deadline={{ .Values.leaderElection.renewDeadline }}
+        - -leader-election-retry-period={{ .Values.leaderElection.retryPeriod }}
         {{- end }}
         resources:
           {{- toYaml .Values.resources | nindent 10 }}
@@ -104,11 +107,9 @@ spec:
         {{- if .Values.webhook.enable }}
         - name: webhook-certs
           secret:
-            secretName: {{ include "spark-operator.fullname" . }}-webhook-certs
-        {{- end }}
-        {{- with .Values.volumes }}
-        {{- toYaml . | nindent 8 }}
-        {{- end }}
+            #secretName: {{ include "spark-operator.fullname" . }}-webhook-certs
+            secretName: spark-webhook-certs
+      {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
