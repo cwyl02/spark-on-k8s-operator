@@ -1,0 +1,5 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestStep
+commands:
+- command: helm uninstall spark-operator -n spark && kubectl delete ns spark && kubectl delete ns volcano-system
+

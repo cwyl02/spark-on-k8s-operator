@@ -1,0 +1,50 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestStep
+commands:
+  - script: |
+      /bin/bash << 'EOF'
+        set -x
+        
+        for i in `seq 2`; do
+          ATTEMPT=0
+          while true; do
+            HELM_STATUS=$(helm list -A -o json | jq ".[] | select(.namespace == \"spark-namespace-$i\") | select(.name == \"spark-operator-$i\") | .status")
+
+            # Break out if zero results.
+            if [[ -z "${HELM_STATUS}" ]]; then
+              break
+            fi
+
+            # Issue uninstall.
+            helm uninstall spark-operator-$i -n spark-namespace-$i
+            kubectl delete clusterrolebinding spark-operator-$i
+            kubectl delete clusterrole spark-operator-$i
+            kubectl delete ns spark-namespace-$i
+
+            echo "Waiting for previous helm release to terminate. Sleeping and retrying in 10 seconds"
+            sleep 10s
+            ATTEMPT=$(( ATTEMPT+ 1 ))
+            if [ "${ATTEMPT}" -ge 30 ]; then
+                echo "Have attempted for 5 mins, exiting"
+                exit 1
+            fi
+          done
+
+          helm repo add spark-operator http://chartmuseum:CHARTMUSEUM_PORT
+          helm repo update
+          helm install \
+          spark-operator-$i \
+          spark-operator/spark-operator \
+          --create-namespace \
+          --namespace spark-namespace-$i \
+          --debug \
+          --set image.repository=OPERATOR_DOCKER_REPO \
+          --set image.tag=OPERATOR_VERSION \
+          --set historyServer.image.repository=SPARK_DOCKER_REPO \
+          --set historyServer.image.tag=SPARK_IMAGE_TAG \
+          --set sparkJobNamespace=spark-namespace-$i \
+          --wait \
+          --timeout 600s
+        done
+      EOF
+    timeout: 3600
