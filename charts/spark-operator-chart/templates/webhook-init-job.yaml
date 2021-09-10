@@ -32,7 +32,6 @@ spec:
             "/usr/bin/gencerts.sh",
             "-n", "{{ .Release.Namespace }}",
             "-s", "{{ include "spark-operator.fullname" . }}-webhook",
-            "-r", "{{ include "spark-operator.fullname" . }}-webhook-certs",
             "-p"
           ]
 {{ end }}

@@ -1,0 +1,21 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestAssert
+timeout: 200
+collectors:
+- selector: app.kubernetes.io/name=spark-operator-history-server
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app.kubernetes.io/instance: spark-operator-history-server
+    app.kubernetes.io/name: spark-operator-history-server
+status:
+  phase: Running
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spark-operator-history-server
+status:
+  availableReplicas: 1

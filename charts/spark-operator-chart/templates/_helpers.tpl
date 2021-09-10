@@ -74,3 +74,9 @@ Create the name of the service account to be used by spark apps
 {{- end -}}
 {{- end -}}
 
+{{/*
+Extract Base Spark version from Chart appVersion as image tag.
+*/}}
+{{- define "history-server.spark-image-tag" -}}
+{{- printf "v%s" (regexSplit "-" .Chart.AppVersion -1 | last) -}}
+{{- end -}}

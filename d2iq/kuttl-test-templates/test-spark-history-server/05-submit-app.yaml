@@ -1,0 +1,11 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestStep
+commands:
+  - script: |
+      sed \
+      -e "s|{{EVENT_LOG_DIR}}|s3a://$AWS_BUCKET_NAME/$(cat .tmp/s3_bucket_path)|g" \
+      -e "s|{{AWS_ACCESS_KEY_ID}}|$AWS_ACCESS_KEY_ID|g" \
+      -e "s|{{AWS_SECRET_ACCESS_KEY}}|$AWS_SECRET_ACCESS_KEY|g" \
+      -e "s|{{AWS_SESSION_TOKEN}}|$AWS_SESSION_TOKEN|g" templates/mock-task-runner.yaml | \
+      kubectl apply -n $NAMESPACE -f -
+    timeout: 600

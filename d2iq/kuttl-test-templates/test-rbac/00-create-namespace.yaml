@@ -1,0 +1,12 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestStep
+commands:
+  - script: |
+      /bin/bash << 'EOF'
+        set -x
+        kubectl delete ns spark-test-rbac
+        kubectl delete clusterrole spark-test-rbac-spark-operator
+        kubectl delete clusterrolebinding spark-test-rbac-spark-operator
+        kubectl create ns spark-test-rbac
+      EOF
+    timeout: 3600

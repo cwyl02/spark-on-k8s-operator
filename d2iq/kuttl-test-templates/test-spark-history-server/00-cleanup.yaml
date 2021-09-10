@@ -1,0 +1,9 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestStep
+commands:
+  - script: |
+      helm uninstall spark-operator -n spark
+      kubectl delete ns spark
+      kubectl delete clusterrolebinding spark-operator
+      kubectl create ns spark
+    timeout: 300
