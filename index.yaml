@@ -17,6 +17,6 @@ entries:
       name: yuchaoran2011
     name: spark-operator
     urls:
-    - https://mesosphere.github.io/spark-on-k8s-operator/spark-operator-1.1.6.tgz
+    - https://cwy02.github.io/spark-on-k8s-operator/spark-operator-1.1.6.tgz
     version: 1.1.6
 generated: "2021-11-01T21:19:20.080847629-07:00"
