@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: spark-operator-overrides
+data:
+  values.yaml: |
+    metrics:
+      enable: true
+
+    podMonitor:
+      enable: true

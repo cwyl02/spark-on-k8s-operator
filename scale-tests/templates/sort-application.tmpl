@@ -1,0 +1,58 @@
+apiVersion: "sparkoperator.k8s.io/v1beta2"
+kind: SparkApplication
+metadata:
+  name: spark-terasort
+spec:
+  type: Scala
+  mode: cluster
+  image: mesosphere/spark:spark-3.0.0-hadoop-2.9-k8s
+  imagePullPolicy: Always
+  mainClass: sorting.SortingApp
+  mainApplicationFile: "https://kudo-spark.s3-us-west-2.amazonaws.com/spark-scala-tests-3.0.0-20200819.jar"
+  arguments:
+    - "SOURCE_PATH"
+    - "TARGET_PATH"
+  sparkConf:
+    "spark.kubernetes.allocation.batch.size": "NUM_EXECUTORS"
+    "spark.scheduler.maxRegisteredResourcesWaitingTime": "3600s"
+    "spark.scheduler.minRegisteredResourcesRatio": "1.0"
+    "spark.hadoop.fs.s3a.impl": "org.apache.hadoop.fs.s3a.S3AFileSystem"
+    "spark.hadoop.fs.s3a.aws.credentials.provider": "org.apache.hadoop.fs.s3a.TemporaryAWSCredentialsProvider"
+    "spark.hadoop.mapreduce.fileoutputcommitter.algorithm.version": "2"
+    "spark.hadoop.fs.s3a.endpoint": "S3_ENDPOINT"
+    "spark.hadoop.fs.s3a.access.key": "AWS_ACCESS_KEY_ID"
+    "spark.hadoop.fs.s3a.secret.key": "AWS_SECRET_ACCESS_KEY"
+    "spark.hadoop.fs.s3a.session.token": "AWS_SESSION_TOKEN"
+    "spark.kubernetes.memoryOverheadFactor": "0.1"
+    "spark.driver.maxResultSize": "64g"
+    "spark.memory.fraction": "0.1"
+    "spark.kubernetes.executor.request.cores": "1"
+    "spark.kubernetes.executor.limit.cores": "1"
+  sparkVersion: "3.0.0"
+  restartPolicy:
+    type: Never
+  driver:
+    tolerations:
+    - key: "dedicated"
+      operator: "Equal"
+      value: "spark-workload"
+      effect: "NoExecute"
+    cores: 4
+    memory: "96g"
+    labels:
+      version: 3.0.0
+      metrics-exposed: "true"
+    serviceAccount: SERVICE_ACCOUNT_NAME
+  executor:
+    cores: 1
+    instances: NUM_EXECUTORS
+    memory: "16g"
+    labels:
+      version: 3.0.0
+      metrics-exposed: "true"
+  monitoring:
+    exposeDriverMetrics: true
+    exposeExecutorMetrics: true
+    prometheus:
+      jmxExporterJar: "/prometheus/jmx_prometheus_javaagent-0.11.0.jar"
+      port: 8090

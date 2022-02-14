@@ -1,0 +1,11 @@
+apiVersion: apps.kommander.d2iq.io/v1alpha2
+kind: AppDeployment
+metadata:
+  name: spark-operator
+  namespace: SPARK_NAMESPACE
+spec:
+  appRef:
+    name: spark-operator-1.1.7
+    kind: App
+  configOverrides:
+    name: spark-operator-overrides
