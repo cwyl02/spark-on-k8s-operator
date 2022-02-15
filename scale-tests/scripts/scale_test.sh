@@ -12,6 +12,11 @@ TEMPLATES_DIR="${SCALE_TESTS_DIR}/templates"
 NAMESPACE_PREFIX=${NAMESPACE_PREFIX:-spark}
 APP_NAME_PREFIX=${APP_NAME_PREFIX:-spark-mtr}
 SERVICE_ACCOUNT_NAME=${SERVICE_ACCOUNT_NAME:-spark-service-account}
+WORKSPACE_NS_PREFIX=${WORKSPACE_NS_PREFIX:-mwt-workspace-}
+PROJECT_NS_PREFIX=${PROJECT_NS_PREFIX:-mwt-project-}
+
+# k get clusters -A -ojson | jq '.items | map(.metadata.name+":"+.metadata.namespace) '
+# k get ns -A -o json  | jq '.items | .[] | .metadata.name'  -r | grep $PROJECT_NS_PREFIX > projects.txt
 
 # To achieve even executors utilization and predictable application duration,
 # NUM_EXECUTORS should be equal to NUM_TASKS. In this case end-to-end duration
@@ -28,15 +33,17 @@ if [[ $# -lt 2 ]]; then
 fi
 
 for n in $(seq ${2}); do
-    NAMESPACE="${NAMESPACE_PREFIX}-${n}"
+    # NAMESPACE="${NAMESPACE_PREFIX}-${n}"
+    NAMESPACE="mwt1-hp89w"
     echo "Generating applications spec for namespace ${NAMESPACE}"
     MULTI_APP_SPEC=""
     for i in $(seq ${1}); do
       SPARK_APP_NAME="${APP_NAME_PREFIX}-ns-${n}-${i}"
 
+      # use project ns admin role
       APP_SPEC=$(cat ${TEMPLATES_DIR}/scale-test-application.tmpl \
         | sed "s|SPARK_APP_NAME|${SPARK_APP_NAME}|" \
-        | sed "s|SERVICE_ACCOUNT_NAME|${SERVICE_ACCOUNT_NAME}|" \
+        | sed "s|SERVICE_ACCOUNT_NAME|${NAMESPACE}|" \
         | sed "s|NUM_EXECUTORS|${NUM_EXECUTORS}|" \
         | sed "s|NUM_TASKS|${NUM_TASKS}|" \
         | sed "s|TASK_DURATION_SEC|${TASK_DURATION_SEC}|")
