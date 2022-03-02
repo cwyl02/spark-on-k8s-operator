@@ -12,7 +12,7 @@ image:
   # -- Image pull policy
   pullPolicy: IfNotPresent
   # -- Overrides the image tag whose default is the chart appVersion.
-  tag: "3.1.1-1.1.6"
+  tag: "3.1.1-1.1.17"
 
 # -- Image pull secrets
 imagePullSecrets: []
@@ -90,6 +90,8 @@ webhook:
   cleanupAnnotations:
     "helm.sh/hook": pre-delete, pre-upgrade
     "helm.sh/hook-delete-policy": hook-succeeded
+    # -- Webhook Timeout in seconds
+  timeout: 30
 
 metrics:
   # -- Enable prometheus metric scraping

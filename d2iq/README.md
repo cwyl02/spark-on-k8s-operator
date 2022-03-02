@@ -40,6 +40,16 @@ d2iq-spark-operator-chart-X.Y.Z | feature | Branch with upstream chart X.Y.Z wit
     - Set `admin.conf` in top level folder with administrative Kubeconfig file.
     - Set `KUBECONFIG` env-var with path to the administrative Kubeconfig file.
 
+## Running Makefile
+
+`d2iq/Makefile` must be executed in root directory of this repo like:
+```bash
+# build spark-operator
+make -f d2iq/Makefile docker-operator
+```
+
+Running `make` in `d2iq` directory won't work!
+
 ## Makefile Targets
 
 Target | Notes
