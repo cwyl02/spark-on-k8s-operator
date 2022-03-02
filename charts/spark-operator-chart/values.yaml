@@ -11,9 +11,8 @@ image:
   repository: docker.io/mesosphere/spark-operator
   # -- Image pull policy
   pullPolicy: IfNotPresent
-  # TODO: use new image
   # -- Overrides the image tag whose default is the chart appVersion.
-  tag: "3.1.1-1.1.6"
+  tag: "3.1.1-1.1.17"
 
 # -- Image pull secrets
 imagePullSecrets: []
